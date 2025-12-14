@@ -1,4 +1,4 @@
-export const ADMIN_EMAIL = "serhiylunhu@gmail.com";
+export const ADMIN_EMAIL = "serhiy.lunhu@gmail.com";
 export const ADMIN_PASS = "admin123";
 
 // Pricing Plans

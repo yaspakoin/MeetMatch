@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { InterestType } from "../types";
+import { InterestType, CompatibilityMetric } from "../types";
 
 const apiKey = process.env.API_KEY || ''; 
 const ai = new GoogleGenAI({ apiKey });
@@ -8,31 +8,28 @@ export const generatePsychologicalQuestions = async (interest: InterestType): Pr
   if (!apiKey) {
     console.warn("API Key is missing. Returning fallback questions.");
     return [
-      "O que te dói mais: falhar com os outros ou falhar contigo mesmo?",
-      "Quando te sentes sozinho, preferes companhia ou silêncio?",
-      "Qual foi a última coisa que mudaste na tua personalidade e porquê?",
-      "Achas que o amor é uma escolha diária ou um sentimento incontrolável?",
-      "Se pudesses apagar uma memória má, apagavas ou guardavas para aprender?",
-      "Preferes ser respeitado pela tua inteligência ou amado pela tua bondade?",
-      "O que é que a maioria das pessoas não entende sobre ti?"
+      "Qual é a mentira que contas a ti próprio todos os dias para conseguires seguir em frente?",
+      "Se pudesses ver um contador acima da cabeça de toda a gente, o que é que gostarias que ele medisse?",
+      "O que é que os teus pais te ensinaram sobre o amor que tu sabes que está completamente errado?",
+      "Preferias ser a pessoa que magoa ou a pessoa que é magoada? Porquê?",
+      "Qual foi o momento exato em que deixaste de ser criança?",
+      "O que é que farias se soubesses que não haveria consequências, nem divinas nem legais?",
+      "Achas que a bondade humana é natural ou é apenas um mecanismo de sobrevivência social?"
     ];
   }
 
   try {
-    // Generate a seed based on time to ensure variety
     const seed = Date.now().toString().slice(-4);
     
     const prompt = `
-      Gera 7 perguntas psicológicas para avaliar compatibilidade na área de "${interest}".
+      Gera 7 perguntas PROFUNDAMENTE PSICOLÓGICAS e FILOSÓFICAS para avaliar compatibilidade na área de "${interest}".
       
-      REGRAS CRÍTICAS:
-      1. Linguagem: Simples, direta, PT-PT (Portugal) mas acessível a qualquer lusófono.
-      2. Nível: Um jovem de 18 anos tem de entender sem esforço. Sem palavras "caras" ou académicas.
-      3. Profundidade: Apesar de simples, a pergunta tem de tocar na ferida ou nos valores fundamentais (Big Five).
-      4. Variedade: Sê criativo! Não uses as perguntas "padrão" de entrevistas. Inventa cenários ou dilemas.
-      5. Seed de aleatoriedade: ${seed} (Usa isto para variar as perguntas).
-
-      Exemplo do tom desejado: "Preferes ter razão ou ter paz?" em vez de "Qual a tua predisposição para conflitos cognitivos?"
+      REGRAS RÍGIDAS (MODE: HARDCORE PSYCHOLOGY):
+      1. PROIBIDO: Perguntas superficiais ("Qual teu hobby?", "Gostas de viajar?").
+      2. OBRIGATÓRIO: Perguntas que toquem na alma, na moralidade, na morte, no medo ou na infância.
+      3. TOM: Curioso, ligeiramente provocador, clínico mas humano.
+      4. EXEMPLO: Em vez de "Gostas de cães?", pergunta "Achas que somos donos dos animais ou carcereiros deles?".
+      5. Seed: ${seed}.
 
       Retorna APENAS um array JSON de strings.
     `;
@@ -46,7 +43,7 @@ export const generatePsychologicalQuestions = async (interest: InterestType): Pr
           type: Type.ARRAY,
           items: { type: Type.STRING }
         },
-        temperature: 1.2, // High temperature for variety
+        temperature: 1.3,
       }
     });
 
@@ -58,28 +55,28 @@ export const generatePsychologicalQuestions = async (interest: InterestType): Pr
   } catch (error) {
     console.error("Gemini Error:", error);
     return [
-      "Nas discussões, tentas ganhar ou tentas entender o outro?",
-      "O que é que a maioria das pessoas pensa de ti que está errado?",
-      "Dás mais valor a alguém que é honesto (mas rude) ou simpático (mas falso)?",
-      "Qual é o teu plano para quando as coisas correm mal?",
-      "O que é que te faz perder o interesse em alguém imediatamente?",
-      "Quando tens um problema, preferes resolver sozinho ou pedir ajuda?",
-      "Se o dinheiro não existisse, como passarias os teus dias?"
+      "Qual é o teu 'traço tóxico' que te recusas a mudar?",
+      "Achas que mereces ser feliz ou apenas tens sorte?",
+      "O que é que te mantém acordado às 3 da manhã: culpa ou medo do futuro?",
+      "Se a tua vida fosse um livro, o vilão seria quem?",
+      "Preferes uma verdade que destrói a tua vida ou uma mentira que a mantém perfeita?",
+      "O que é que perdoarias numa traição?",
+      "Quem é que tu serias se não tivesses medo de ser julgado?"
     ];
   }
 };
 
 export const analyzeCompatibility = async (userAnswers: Record<string, string>, interest: InterestType): Promise<number> => {
-   if (!apiKey) return Math.floor(Math.random() * 30) + 70; // Mock score if no API
+   if (!apiKey) return Math.floor(Math.random() * 20) + 80; // Mock score high for satisfaction
 
    try {
      const prompt = `
-       Analisa as seguintes respostas de um utilizador procurando por ${interest}:
+       Age como um psicólogo comportamental sénior. Analisa as respostas deste utilizador (${interest}):
        ${JSON.stringify(userAnswers)}
        
-       Com base nestas respostas, quão compatível é esta pessoa com um perfil "saudável e equilibrado"?
-       Dá uma pontuação de 0 a 100. Sê rigoroso.
-       Retorna apenas o número inteiro.
+       Calcula o índice de compatibilidade com um arquétipo de "Personalidade Complementar".
+       Não sejas generoso. Sê clínico.
+       Retorna apenas um número inteiro entre 0 e 100.
      `;
 
      const response = await ai.models.generateContent({
@@ -91,34 +88,77 @@ export const analyzeCompatibility = async (userAnswers: Record<string, string>, 
        }
      });
 
-     const score = parseInt(response.text || "75");
-     return isNaN(score) ? 75 : score;
+     const score = parseInt(response.text || "88");
+     return isNaN(score) ? 88 : score;
    } catch (e) {
-     return 85;
+     return 88;
    }
 };
 
-// NEW: Generates deep psychological reasoning for matches
+export const generateCompatibilityDetails = (score: number): CompatibilityMetric[] => {
+    const base = score;
+    const vary = (val: number) => Math.min(100, Math.max(40, val + (Math.random() * 20 - 10)));
+    
+    return [
+        { subject: 'Inteligência Emocional', A: vary(base), fullMark: 100 },
+        { subject: 'Valores Morais', A: vary(base), fullMark: 100 },
+        { subject: 'Química Intelectual', A: vary(base - 5), fullMark: 100 },
+        { subject: 'Resolução Conflito', A: vary(base + 5), fullMark: 100 },
+        { subject: 'Visão de Futuro', A: vary(base), fullMark: 100 },
+    ];
+};
+
+export const generateIcebreaker = async (interest: InterestType, matchName: string): Promise<string> => {
+    if (!apiKey) return "Se pudesses apagar um dia da tua história, qual seria e porquê?";
+
+    try {
+        const prompt = `
+          Gera uma frase de abertura (Icebreaker) EXTREMAMENTE PROFUNDA e INTRIGANTE para enviar a um match anónimo.
+          
+          REGRAS DE OURO:
+          1. É ABSOLUTAMENTE PROIBIDO dizer "Olá", "Oi", "Como estás", "Tudo bem".
+          2. A frase deve ir direto ao assunto, sem apresentações.
+          3. Deve ser uma questão filosófica, um dilema moral, ou uma observação psicológica aguda.
+          4. Contexto: ${interest}.
+          
+          Exemplos do tom desejado:
+          - "Achas que o sofrimento é necessário para a evolução ou é apenas masoquismo?"
+          - "Qual foi a última vez que choraste e não contaste a ninguém?"
+          
+          Retorna apenas a string da frase.
+        `;
+
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+        });
+        
+        return response.text || "O que é que tu sabes que é verdade, mas que quase ninguém concorda contigo?";
+    } catch (e) {
+        return "Qual é o hábito que tens que mais envergonharia os teus pais?";
+    }
+};
+
 export const generateDeepMatchAnalysis = (interest: InterestType, matchName: string): string => {
   const analysisTemplates = {
     [InterestType.DATING]: [
-      `A vossa compatibilidade no traço de 'Abertura à Experiência' é de 94%. Ambos demonstraram, através das respostas, um medo latente de estagnação. Conectei-vos porque ambos valorizam a "verdade dolorosa" acima de "mentiras confortáveis". **Desafio:** Perguntem um ao outro: "Qual é a verdade sobre ti que tens medo de dizer no primeiro encontro?"`,
-      `Detetei um padrão de apego semelhante: ambos são independentes, mas procuram um 'porto seguro'. O match ocorreu porque as vossas respostas sobre gestão de conflito são idênticas — preferem resolver logicamente do que ir dormir chateados. **Provocação:** "Quando estás triste, queres espaço ou um abraço? E porquê?"`,
-      `A vossa linguagem do amor primária parece ser 'Atos de Serviço', mas a vossa linguagem de conflito é oposta. Isto cria uma tensão dinâmica interessante. Vocês precisam de alguém que vos desafie intelectualmente. **Pergunta:** "Qual foi a última vez que mudaste de opinião sobre algo fundamental?"`
+      `**Análise Clínica:** Detetei uma ressonância nos vossos mecanismos de defesa. Enquanto tu intelectualizas a dor, este perfil tende a sublimá-la através da ação. A compatibilidade é de 94% porque ambos partilham o medo fundamental da irrelevância. **Ponto de Tensão:** A vossa definição de "lealdade" difere ligeiramente nos limites éticos.`,
+      `**Relatório Psicológico:** A vossa pontuação em "Abertura à Experiência" e "Neuroticismo" cria um equilíbrio raro. Tu trazes a estrutura que falta ao caos deste perfil, e este perfil traz a imprevisibilidade que tu secretamente desejas mas reprimes. O match baseia-se na vossa resposta idêntica à questão sobre o perdão.`,
+      `**Sincronicidade de Valores:** Ambos demonstraram um desprezo por convenções sociais superficiais. O algoritmo uniu-vos não pelo que gostam, mas pelo que odeiam. A vossa "Sombra Junguiana" (o lado oculto da personalidade) é compatível. Este match tem alto potencial de intensidade e transformação mútua.`
     ],
     [InterestType.NETWORKING]: [
-      `Ambos pontuaram alto em 'Ambição', mas baixo em 'Conformidade'. Isto indica que ambos são disruptores nas vossas áreas. O match existe porque nenhum de vocês suporta "conversas de circunstância". **Directo ao assunto:** "Qual é o projeto que tens na gaveta porque tens medo que falhe?"`,
-      `Identifiquei que ambos valorizam a autonomia acima do salário. Vocês procuram liberdade, não apenas sucesso. **Topic:** "O que é que sacrificarias na tua carreira hoje para ter mais liberdade amanhã?"`
+      `**Perfil de Ambição:** Ambos exibem traços de "Maquiavelismo Funcional" — a vontade de atingir objetivos a qualquer custo, mas mantendo uma ética pessoal rígida. Tu és o estratega, este perfil é o executor. Juntos, cobrem os pontos cegos um do outro.`,
+      `**Dissonância Cognitiva:** O match ocorreu porque ambos questionaram o status quo nas vossas respostas. Vocês não procuram validação, procuram desafio. A vossa conversa não será confortável, será produtiva.`
     ],
     [InterestType.FRIENDSHIP]: [
-      `Os vossos perfis psicológicos mostram uma necessidade de 'Profundidade' vs 'Superficialidade'. Ambos responderam que preferem ter 2 amigos reais a 20 conhecidos. **Gelo:** "Qual é a opinião impopular que tens e que normalmente afasta as pessoas?"`,
-      `Vocês partilham o mesmo sentido de humor negro e uma visão cínica mas esperançosa da vida. **Pergunta:** "Qual foi o momento mais embaraçoso da tua vida que agora te faz rir?"`
+      `**Conexão de Alma:** A análise semântica das vossas respostas revelou uma solidão partilhada, mesmo quando rodeados de pessoas. Ambos valorizam a "verdade crua" acima da "polidez simpática".`,
+      `**Dinâmica Social:** Vocês são ambos observadores num mundo de protagonistas. O sistema detetou um sentido de humor negro idêntico nas entrelinhas das vossas respostas abertas.`
     ],
     [InterestType.MENTORSHIP]: [
-      `Conexão baseada em Valores: O mentor tem a experiência que o mentee procura, mas o mentee tem a audácia que o mentor sente falta. É uma troca simbiótica. **Ponto de partida:** "Qual é a lição que aprendeste da maneira mais difícil possível?"`
+      `**Transferência de Sabedoria:** A relação detetada é arquetípica: O Mestre Cético e o Aprendiz Rebelde. A fricção intelectual entre os dois gerará o crescimento necessário.`
     ],
     [InterestType.ACTIVITY_PARTNER]: [
-      `Alta energia detetada. Ambos usam o desporto/atividade como escape para ansiedade mental. O match não é sobre o desporto, é sobre a 'terapia' que ele proporciona. **Questão:** "O que é que estás a tentar esquecer quando estás a correr/treinar?"`
+      `**Fuga e Catarse:** Ambos utilizam a atividade física não como hobby, mas como mecanismo de regulação emocional. O silêncio partilhado entre vocês será mais valioso que a conversa.`
     ]
   };
 
@@ -129,6 +169,5 @@ export const generateDeepMatchAnalysis = (interest: InterestType, matchName: str
 };
 
 export const detectLocationFromCoordinates = async (lat: number, lng: number): Promise<{ city: string, country: string } | null> => {
-    // Function kept for backward compatibility but unused in new UI flow
     return null;
 };

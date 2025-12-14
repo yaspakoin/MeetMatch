@@ -18,6 +18,7 @@ export interface User {
   name: string;
   age?: number;
   bio?: string; // Added Bio for profile editing
+  avatarUrl?: string; // Added Avatar URL for profile photo
   role: UserRole;
   isPremium: boolean;
   country?: string;
@@ -26,6 +27,12 @@ export interface User {
   primaryInterest?: InterestType;
   questionnaireAnswers?: Record<string, string>;
   createdAt: Date;
+}
+
+export interface CompatibilityMetric {
+  subject: string;
+  A: number; // User score (or Match score normalized)
+  fullMark: number;
 }
 
 export interface MatchProfile {
@@ -37,7 +44,8 @@ export interface MatchProfile {
   interestType: InterestType;
   avatarUrl: string;
   isNew: boolean;
-  matchReasoning?: string; // NEW: Stores the "Why" we matched them
+  matchReasoning?: string; // Stores the "Why" we matched them
+  compatibilityDetails?: CompatibilityMetric[]; // NEW: For Radar Chart
   // Private fields revealed only on mutual agreement
   instagram?: string;
   phoneNumber?: string;

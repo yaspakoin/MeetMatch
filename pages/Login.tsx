@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { User, UserRole } from '../types';
 import { Button } from '../components/Button';
-import { Lock, Mail, User as UserIcon, Briefcase, Heart, BrainCircuit, Loader2 } from 'lucide-react';
+import { Lock, Mail, User as UserIcon, Briefcase, Heart, BrainCircuit, Loader2, AlertCircle } from 'lucide-react';
 import { ADMIN_EMAIL, ADMIN_PASS } from '../constants';
 
 interface LoginProps {
   onLogin: (user: User) => void;
 }
+
+// Mock Database for Session (simulates backend)
+// Pre-populate with Admin and a Demo user
+const MOCK_USER_DB = new Set<string>([
+  ADMIN_EMAIL.toLowerCase(),
+  'demo@meetmatch.com'
+]);
 
 // Simple Google Icon SVG Component
 const GoogleIcon = () => (
@@ -44,13 +51,17 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     
     // Simulate Network Request
     setTimeout(() => {
+        // Automatically register google users in our mock DB
+        MOCK_USER_DB.add('user@gmail.com');
+        
         onLogin({
             id: 'mock-user-google-1',
             email: 'user@gmail.com',
             name: 'Utilizador Google',
             role: UserRole.USER,
             isPremium: false,
-            createdAt: new Date()
+            createdAt: new Date(),
+            avatarUrl: 'https://picsum.photos/200/200?grayscale'
         });
     }, 1000);
   };
@@ -60,46 +71,77 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     setError('');
     setIsLoading(true);
 
+    // Normalize inputs for comparison
+    const inputEmail = email.trim().toLowerCase();
+    const inputPass = password.trim();
+    const adminEmail = ADMIN_EMAIL.toLowerCase();
+
     // Simulate Network Request
     setTimeout(() => {
-        // ADMIN CHECK
-        if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
-            onLogin({
-                id: 'admin-1',
-                email: ADMIN_EMAIL,
-                name: 'Serhiy Admin',
-                role: UserRole.ADMIN,
-                isPremium: true,
-                createdAt: new Date()
-            });
+        // 1. ADMIN CHECK (Robust check)
+        if (inputEmail === adminEmail) {
+            if (inputPass === ADMIN_PASS) {
+                onLogin({
+                    id: 'admin-1',
+                    email: ADMIN_EMAIL,
+                    name: 'Serhiy Admin',
+                    role: UserRole.ADMIN,
+                    isPremium: true,
+                    createdAt: new Date(),
+                    avatarUrl: 'https://ui-avatars.com/api/?name=Serhiy+Admin&background=random'
+                });
+            } else {
+                setError('Password de administrador incorreta.');
+                setIsLoading(false);
+            }
             return;
         }
 
-        // REGULAR USER VALIDATION
+        // 2. REGULAR USER FLOW
         if (isLogin) {
+            // LOGIN ATTEMPT
             if (email && password) {
-                onLogin({
-                    id: 'user-' + Date.now(),
-                    email: email,
-                    name: 'Utilizador Demo',
-                    role: UserRole.USER,
-                    isPremium: false,
-                    createdAt: new Date()
-                });
+                // Check if user exists in our Mock DB
+                if (MOCK_USER_DB.has(inputEmail)) {
+                    onLogin({
+                        id: 'user-' + Date.now(),
+                        email: email,
+                        name: 'Utilizador Demo',
+                        role: UserRole.USER,
+                        isPremium: false,
+                        createdAt: new Date(),
+                        avatarUrl: 'https://picsum.photos/200/200?grayscale&blur=2'
+                    });
+                } else {
+                    // USER DOES NOT EXIST
+                    setError('Conta não encontrada. Por favor registe-se primeiro.');
+                    setIsLoading(false);
+                }
             } else {
                 setError('Preencha todos os campos.');
                 setIsLoading(false);
             }
         } else {
-            // REGISTER
+            // REGISTER ATTEMPT
             if (email && password && name) {
+                // Check if already exists
+                if (MOCK_USER_DB.has(inputEmail)) {
+                    setError('Este email já está registado. Faça login.');
+                    setIsLoading(false);
+                    return;
+                }
+
+                // Register user
+                MOCK_USER_DB.add(inputEmail);
+
                  onLogin({
                     id: 'user-' + Date.now(),
                     email: email,
                     name: name,
                     role: UserRole.USER,
                     isPremium: false,
-                    createdAt: new Date()
+                    createdAt: new Date(),
+                    avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`
                 });
             } else {
                 setError('Preencha todos os campos.');
@@ -196,9 +238,9 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </div>
             
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm flex items-center gap-2 animate-fade-in">
-                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></span>
-                {error}
+              <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm flex items-start gap-2 animate-fade-in">
+                 <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                 <span>{error}</span>
               </div>
             )}
 
