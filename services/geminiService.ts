@@ -1,7 +1,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { InterestType, CompatibilityMetric } from "../types";
 
-const apiKey = process.env.API_KEY || ''; 
+// Use process.env.API_KEY as required by guidelines
+const apiKey = process.env.API_KEY; 
 const ai = new GoogleGenAI({ apiKey });
 
 export const generatePsychologicalQuestions = async (interest: InterestType): Promise<string[]> => {
