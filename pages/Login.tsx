@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, UserRole } from '../types';
 import { Button } from '../components/Button';
-import { Lock, Mail, User as UserIcon, Briefcase, Heart, Users, BrainCircuit } from 'lucide-react';
+import { Lock, Mail, User as UserIcon, Briefcase, Heart, BrainCircuit, Loader2 } from 'lucide-react';
 import { ADMIN_EMAIL, ADMIN_PASS } from '../constants';
 
 interface LoginProps {
@@ -36,64 +36,77 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleGoogleLogin = () => {
-    // Simulação de login com Google
-    onLogin({
-      id: 'google-user-' + Math.random().toString(36).substr(2, 9),
-      email: `novo.usuario.${Math.floor(Math.random()*1000)}@gmail.com`,
-      name: 'Utilizador Google',
-      role: UserRole.USER,
-      isPremium: false,
-      createdAt: new Date()
-    });
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    setError('');
+    
+    // Simulate Network Request
+    setTimeout(() => {
+        onLogin({
+            id: 'mock-user-google-1',
+            email: 'user@gmail.com',
+            name: 'Utilizador Google',
+            role: UserRole.USER,
+            isPremium: false,
+            createdAt: new Date()
+        });
+    }, 1000);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
-    if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
-      onLogin({
-        id: 'admin-001',
-        email,
-        name: 'Serhiy Admin',
-        role: UserRole.ADMIN,
-        isPremium: true,
-        createdAt: new Date()
-      });
-      return;
-    }
+    // Simulate Network Request
+    setTimeout(() => {
+        // ADMIN CHECK
+        if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
+            onLogin({
+                id: 'admin-1',
+                email: ADMIN_EMAIL,
+                name: 'Serhiy Admin',
+                role: UserRole.ADMIN,
+                isPremium: true,
+                createdAt: new Date()
+            });
+            return;
+        }
 
-    if (isLogin) {
-      // Simulation of user login
-      if (email && password) {
-        onLogin({
-          id: 'user-' + Math.random().toString(36).substr(2, 9),
-          email,
-          name: 'Utilizador', // Would come from DB
-          role: UserRole.USER,
-          isPremium: false,
-          createdAt: new Date()
-        });
-      } else {
-        setError('Por favor preencha todos os campos.');
-      }
-    } else {
-      // Registration
-      if (email && password && name) {
-        onLogin({
-          id: 'user-' + Math.random().toString(36).substr(2, 9),
-          email,
-          name,
-          role: UserRole.USER,
-          isPremium: false,
-          createdAt: new Date()
-        });
-      } else {
-        setError('Por favor preencha todos os campos.');
-      }
-    }
+        // REGULAR USER VALIDATION
+        if (isLogin) {
+            if (email && password) {
+                onLogin({
+                    id: 'user-' + Date.now(),
+                    email: email,
+                    name: 'Utilizador Demo',
+                    role: UserRole.USER,
+                    isPremium: false,
+                    createdAt: new Date()
+                });
+            } else {
+                setError('Preencha todos os campos.');
+                setIsLoading(false);
+            }
+        } else {
+            // REGISTER
+            if (email && password && name) {
+                 onLogin({
+                    id: 'user-' + Date.now(),
+                    email: email,
+                    name: name,
+                    role: UserRole.USER,
+                    isPremium: false,
+                    createdAt: new Date()
+                });
+            } else {
+                setError('Preencha todos os campos.');
+                setIsLoading(false);
+            }
+        }
+    }, 1000);
   };
 
   return (
@@ -166,9 +179,10 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
             <button
               onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 text-gray-700 font-medium py-3 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 mb-6 shadow-sm group"
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 text-gray-700 font-medium py-3 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 mb-6 shadow-sm group disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <GoogleIcon />
+              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <GoogleIcon />}
               <span className="group-hover:text-gray-900">Continuar com Google</span>
             </button>
 
@@ -182,8 +196,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </div>
             
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm flex items-center gap-2">
-                 <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+              <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm flex items-center gap-2 animate-fade-in">
+                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></span>
                 {error}
               </div>
             )}
@@ -199,7 +213,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       placeholder="Como quer ser chamado?"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all"
+                      disabled={isLoading}
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all disabled:bg-gray-100"
                     />
                   </div>
                 </div>
@@ -214,7 +229,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     placeholder="seu@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all"
+                    disabled={isLoading}
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all disabled:bg-gray-100"
                   />
                 </div>
               </div>
@@ -231,12 +247,14 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all"
+                    disabled={isLoading}
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all disabled:bg-gray-100"
                   />
                 </div>
               </div>
 
-              <Button type="submit" fullWidth className="py-3 text-base shadow-purple-500/25">
+              <Button type="submit" fullWidth disabled={isLoading} className="py-3 text-base shadow-purple-500/25 flex items-center justify-center gap-2">
+                {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isLogin ? 'Entrar na Plataforma' : 'Criar Conta Gratuita'}
               </Button>
             </form>
@@ -245,6 +263,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <p className="text-sm text-gray-600">
                 {isLogin ? 'Ainda não tem conta?' : 'Já tem uma conta?'}
                 <button
+                  type="button"
                   onClick={() => { setIsLogin(!isLogin); setError(''); }}
                   className="ml-2 text-purple-600 hover:text-purple-800 font-bold hover:underline"
                 >

@@ -6,7 +6,7 @@ import { UserDashboard } from './pages/UserDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { Chat } from './pages/Chat';
 import { SUBSCRIPTION_PLANS } from './constants';
-import { X, EyeOff, Check } from 'lucide-react';
+import { X, EyeOff, Check, Loader2 } from 'lucide-react';
 import { Button } from './components/Button';
 
 type PreviewMode = 'FREE' | 'PREMIUM' | null;
@@ -16,12 +16,18 @@ const App: React.FC = () => {
   const [activeChat, setActiveChat] = useState<MatchProfile | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string>('monthly');
+  const [isLoading, setIsLoading] = useState(false);
   
-  // State for Admin Preview Mode (Changed from boolean to enum type)
+  // State for Admin Preview Mode
   const [adminPreviewMode, setAdminPreviewMode] = useState<PreviewMode>(null);
 
   const handleLogin = (user: User) => {
-    setCurrentUser(user);
+    setIsLoading(true);
+    // Simulate network delay
+    setTimeout(() => {
+      setCurrentUser(user);
+      setIsLoading(false);
+    }, 800);
   };
 
   const handleLogout = () => {
@@ -48,7 +54,6 @@ const App: React.FC = () => {
     
     // Simulate payment
     if (currentUser) {
-      // If in preview mode 'FREE', upgrading switches it to 'PREMIUM' simulation
       if (adminPreviewMode === 'FREE') {
         setAdminPreviewMode('PREMIUM');
         setShowPaymentModal(false);
@@ -61,6 +66,14 @@ const App: React.FC = () => {
       alert(`Upgrade realizado com sucesso! Bem-vindo ao plano ${plan?.name}.`);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="w-10 h-10 text-purple-600 animate-spin" />
+      </div>
+    );
+  }
 
   // --- RENDER LOGIC ---
 
