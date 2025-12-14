@@ -1,0 +1,7 @@
+{
+  "name": "MeetMatch",
+  "description": "Uma plataforma de matching impulsionada por IA para conexões profundas baseadas em psicologia e interesses partilhados.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
